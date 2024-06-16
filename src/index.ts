@@ -6,21 +6,25 @@ import compression from "compression";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import {
+  registerRoute,
+  loginRoute,
+  AlluserControllerRoutes,
+} from "./routes/index";
 
 dotenv.config();
 const app = express();
 
 const PORT = process.env.PORT;
-app.use(
-  cors({
-    credentials: true,
-  })
-);
 
+app.use(cors());
 app.use(express.json());
 app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());
+app.use(registerRoute());
+app.use(loginRoute());
+app.use(AlluserControllerRoutes());
 
 const server: http.Server = http.createServer(app);
 
