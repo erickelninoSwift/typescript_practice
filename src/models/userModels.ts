@@ -19,13 +19,12 @@ const UserSchema = new mongoose.Schema<IUserFormat>({
     password: {
       type: String,
       required: true,
-      select: false,
     },
     salt: {
       type: String,
-      select: false,
+      // select: false,
     },
-    sessionToken: { type: String, select: false },
+    sessionToken: { type: String },
   },
 });
 
@@ -41,13 +40,14 @@ export const getOneUser = (userId: string) =>
 export const getUserByEmail = (email: string) =>
   UserModel.find({ email: email });
 
-export const getUserBySessionToken = (userToken: string) =>
-  UserModel.findOne({ "authentication.sessionToken": userToken });
+export const getUserBySessionToken = (userToken: string) => {
+  return UserModel.find({ authentication: { sessionToken: userToken } });
+};
 
 export const createUser = (values: IUserFormat) => new UserModel(values);
 
 export const deleteuserById = (id: string) =>
-  UserModel.findOneAndDelete({ id });
+  UserModel.findOneAndDelete({ _id: id });
 
 export const updateSpecifiUser = (id: string, values: IUserFormat) =>
   UserModel.findOneAndUpdate({ _id: id }, values);

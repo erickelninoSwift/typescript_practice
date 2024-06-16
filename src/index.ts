@@ -10,6 +10,7 @@ import {
   registerRoute,
   loginRoute,
   AlluserControllerRoutes,
+  deleteControllerRoutes,
 } from "./routes/index";
 
 dotenv.config();
@@ -25,6 +26,7 @@ app.use(bodyParser.json());
 app.use(registerRoute());
 app.use(loginRoute());
 app.use(AlluserControllerRoutes());
+app.use(deleteControllerRoutes());
 
 const server: http.Server = http.createServer(app);
 

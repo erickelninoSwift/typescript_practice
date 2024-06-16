@@ -1,7 +1,7 @@
 import express from "express";
 import { getUserByEmail, createUser, IUserFormat } from "../models/userModels";
 import { passwordHashed, salt, createToken } from "../helpers";
-import jwt from "jsonwebtoken";
+
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 dotenv.config();
@@ -17,11 +17,14 @@ export const handleLoginControllers = async (
         status: "Error was found : please provide email/password",
       });
 
-    const checkuserexist = await getUserByEmail(email).select(
-      "+authentication.password +authentication.sessionToken"
-    );
-    console.log(checkuserexist[0]);
-
+    const checkuserexist = await getUserByEmail(email);
+    console.log(checkuserexist);
+    if (!checkuserexist[0]) {
+      return response.status(404).json({
+        status: false,
+        message: "User doesnt exist",
+      });
+    }
     const comparePassword = bcrypt.compareSync(
       password,
       checkuserexist[0].authentication.password
@@ -40,13 +43,10 @@ export const handleLoginControllers = async (
       checkuserexist[0].authentication.password
     );
 
-    checkuserexist[0].authentication.sessionToken = token;
-
-    response.cookie(
-      "AUTH_SESSION_TOKEN",
-      checkuserexist[0].authentication.sessionToken,
-      { domain: "localhost", path: "/" }
-    );
+    response.cookie("AUTH_SESSION_TOKEN", token, {
+      domain: "localhost",
+      path: "/",
+    });
 
     return response.status(200).json({
       status: "success",
@@ -75,7 +75,6 @@ export const handleCreateuser = async (
 
     const checkUserEmailExist = await getUserByEmail(email);
 
-    console.log(checkUserEmailExist[0]);
     if (checkUserEmailExist[0]) {
       return response.status(401).json({
         error: "User with this email Already found ",
@@ -90,7 +89,7 @@ export const handleCreateuser = async (
       authentication: {
         password: hashedpassword,
         salt: salt,
-        sessionToken: null,
+        sessionToken: "",
       },
     };
 
