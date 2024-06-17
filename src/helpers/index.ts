@@ -7,13 +7,5 @@ export const salt: string = bcrypt.genSaltSync(5);
 export const passwordHashed = (password: string) =>
   bcrypt.hashSync(password, salt);
 
-export const createToken = (
-  password: string,
-  email: string,
-  passHashed: string
-) =>
-  jwt.sign(
-    { email: email, password: password, hashed: passHashed },
-    process.env.SECRET,
-    { expiresIn: "3h" }
-  );
+export const createToken = (id: string, email: string) =>
+  jwt.sign({ id: id, email: email }, process.env.SECRET, { expiresIn: "3h" });

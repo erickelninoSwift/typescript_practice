@@ -1,7 +1,12 @@
 import express, { NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { get, identity, merge } from "lodash";
-import { getUserBySessionToken } from "../models/userModels";
+import {
+  getUserBySessionToken,
+  getUserByEmail,
+  getOneUser,
+  IUserFormat,
+} from "../models/userModels";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -22,11 +27,11 @@ export const isAuhtenticated = async (
     const existingUser = await getUserBySessionToken(currentSessionToken);
     if (!existingUser) {
       return response.status(403).json({
-        messsage: "There is no user under this token please Login",
+        messsage: "Access Forbidden",
       });
     }
 
-    merge(request, { identity: existingUser });
+    // merge(request, { identity: existingUser });
 
     return next();
   } catch (error) {
@@ -43,23 +48,27 @@ export const isOwner = async (
 ) => {
   try {
     const { id } = request.params;
-    const currentSessionToken = request.cookies["AUTH_SESSION_TOKEN"] as string;
+    const currentSessionToken = request.cookies["AUTH_SESSION_TOKEN"];
     jwt.verify(
       currentSessionToken,
       process.env.SECRET,
-      async (err, decoded) => {
+      (err: Error, decoded: any) => {
         if (err) {
           return response.status(400).json({
-            message: "wrong user",
+            message: err.message,
           });
         }
-        console.log(decoded);
-        return response.json({
-          decoded,
-        });
+
+        const { id: userLoggedInID } = decoded;
+
+        console.log(userLoggedInID);
+        if (userLoggedInID === id) {
+          return response.status(403).send("Forbidden");
+        }
+        next();
       }
     );
   } catch (error) {
-    return response.status(500).json({});
+    return response.status(500);
   }
 };

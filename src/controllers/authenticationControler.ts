@@ -37,11 +37,7 @@ export const handleLoginControllers = async (
       });
     }
 
-    const token = createToken(
-      password,
-      email,
-      checkuserexist[0].authentication.password
-    );
+    const token: string = createToken(checkuserexist[0].id, email);
 
     response.cookie("AUTH_SESSION_TOKEN", token, {
       domain: "localhost",
